@@ -4,14 +4,16 @@ MyRobotSafetyProperties::MyRobotSafetyProperties(ControlSystem &cs, double dt)
     : cs(cs),
     
       slSystemOff("System is off"),
-      slSwitchingOff("System is switching off"),
+      slStop("Stop"),
+      slStopping("Stopping"),
       slSwitchingOn("System is switching on"),
       slSystemOn("System is on"),
 
-      doSystemOn("Startup the system"),
-      switchedOn("System is switched on")
-      doSystemOff("Shutdown the system")
-      switchedOff("System is switched off")
+      seDoSystemOn("Startup the system"),
+ //     seSwitchedOn("System is switched on"),
+      seDoStop("do Stop"),
+      seStopped("top do done"),
+      seDoSystemOff("Shutdown the system")
 
 {
     eeros::hal::HAL &hal = eeros::hal::HAL::instance();
@@ -22,23 +24,26 @@ MyRobotSafetyProperties::MyRobotSafetyProperties(ControlSystem &cs, double dt)
     // criticalOutputs = { ... };
 
     // Declare and add critical inputs
+    
     // ... = eeros::hal::HAL::instance().getLogicInput("...", ...);
 
     // criticalInputs = { ... };
 
     // Add all safety levels to the safety system
     addLevel(slSystemOff);
-    addLevel(slSwitchingOff);
-    addLevel(slSwitchingOn);
+    addLevel(slStop);
+    addLevel(slStopping);
+    addLevel(slSwitchingOn);  
     addLevel(slSystemOn);
 
     // Add events to individual safety levels
-    slSystemOff.addEvent(doSystemOn, slSwitchingOn, kPublicEvent);
-    slSwitchingOff.addEvent(switchedOff, slSystemOff, kPrivateEvent);
-    slSwitchingOn.addEvent(switchedOn, slSystemOn, kPrivateEvent);
+    slStop.addEvent(seDoSystemOn, slSwitchingOn, kPublicEvent);
+    slStopping.addEvent(seStopped, slStop, kPrivateEvent);
+    slSwitchingOn.addEvent(seSwitchedOn, slSystemOn, kPrivateEvent);
+
 
     // Add events to multiple safety levels
-    addEventToLevelAndAbove(slSwitchingOn, slSwitchingOff, doSwitchingOff, kPublicEvent);
+    addEventToLevelAndAbove(slSwitchingOn, seDoStop, slStopping, kPublicEvent);
     // addEventToAllLevelsBetween(lowerLevel, upperLevel, event, targetLevel, kPublicEvent/kPrivateEvent);
 
     // Define input actions for all levels
@@ -53,8 +58,12 @@ MyRobotSafetyProperties::MyRobotSafetyProperties(ControlSystem &cs, double dt)
         eeros::Executor::stop();
     });
 
-    slSwitchingOff.setLevelAction([&](SafetyContext *privateContext) {
-        // Hier sollte CAN Stopbefehl "Motor stop (0x81)" oder "Motor shutdown (0x80)" ausgelöst werden"
+    slStop.setLevelAction([&](SafetyContext *privateContext) {
+        privateContext->triggerEvent(seStart);
+    });
+
+    slStopping.setLevelAction([&](SafetyContext *privateContext) {
+    // Hier sollte CAN Stopbefehl "Motor stop (0x81)" oder "Motor shutdown (0x80)" ausgelöst werden"
     });
 
     slSwitchingOn.setLevelAction([&](SafetyContext *privateContext) {
@@ -65,7 +74,7 @@ MyRobotSafetyProperties::MyRobotSafetyProperties(ControlSystem &cs, double dt)
     });
 
     // Define entry level
-    setEntryLevel(slSystemOff);
+    setEntryLevel(slStop);
 
     // Define exit function
     exitFunction = ([&](SafetyContext *privateContext) {
