@@ -3,11 +3,16 @@
 MyRobotSafetyProperties::MyRobotSafetyProperties(ControlSystem &cs, double dt)
     : cs(cs),
     
-      slSystemOff("System is offline"),
-      slSystemOn("System is online"),
+      slSystemOff("System is off"),
+      slSwitchingOff("System is switching off"),
+      slSwitchingOn("System is switching on"),
+      slSystemOn("System is on"),
 
       doSystemOn("Startup the system"),
+      switchedOn("System is switched on")
       doSystemOff("Shutdown the system")
+      switchedOff("System is switched off")
+
 {
     eeros::hal::HAL &hal = eeros::hal::HAL::instance();
 
@@ -23,13 +28,17 @@ MyRobotSafetyProperties::MyRobotSafetyProperties(ControlSystem &cs, double dt)
 
     // Add all safety levels to the safety system
     addLevel(slSystemOff);
+    addLevel(slSwitchingOff);
+    addLevel(slSwitchingOn);
     addLevel(slSystemOn);
 
     // Add events to individual safety levels
-    slSystemOff.addEvent(doSystemOn, slSystemOn, kPublicEvent);
-    slSystemOn.addEvent(doSystemOff, slSystemOff, kPublicEvent);
+    slSystemOff.addEvent(doSystemOn, slSwitchingOn, kPublicEvent);
+    slSwitchingOff.addEvent(switchedOff, slSystemOff, kPrivateEvent);
+    slSwitchingOn.addEvent(switchedOn, slSystemOn, kPrivateEvent);
 
     // Add events to multiple safety levels
+    addEventToLevelAndAbove(slSwitchingOn, slSwitchingOff, doSwitchingOff, kPublicEvent);
     // addEventToAllLevelsBetween(lowerLevel, upperLevel, event, targetLevel, kPublicEvent/kPrivateEvent);
 
     // Define input actions for all levels
@@ -44,6 +53,13 @@ MyRobotSafetyProperties::MyRobotSafetyProperties(ControlSystem &cs, double dt)
         eeros::Executor::stop();
     });
 
+    slSwitchingOff.setLevelAction([&](SafetyContext *privateContext) {
+        // Hier sollte CAN Stopbefehl "Motor stop (0x81)" oder "Motor shutdown (0x80)" ausgelöst werden"
+    });
+
+    slSwitchingOn.setLevelAction([&](SafetyContext *privateContext) {
+    });
+
     slSystemOn.setLevelAction([&](SafetyContext *privateContext) {
         cs.timedomain.start();
     });
@@ -53,6 +69,6 @@ MyRobotSafetyProperties::MyRobotSafetyProperties(ControlSystem &cs, double dt)
 
     // Define exit function
     exitFunction = ([&](SafetyContext *privateContext) {
-        privateContext->triggerEvent(doSystemOff);
+        privateContext->triggerEvent(doSwitchingOff);
     });
 }

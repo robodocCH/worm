@@ -11,12 +11,18 @@ public:
     MyRobotSafetyProperties(ControlSystem &cs, double dt);
 
     // Define all possible events
+    eeros::safety::SafetyEvent doSystemOn; 
+    eeros::safety::SafetyEvent switchedOn;
     eeros::safety::SafetyEvent doSystemOff;
-    eeros::safety::SafetyEvent doSystemOn;
+    eeros::safety::SafetyEvent switchedOff;
+    
 
     // Defina all possible levels
     eeros::safety::SafetyLevel slSystemOff;
+    eeros::safety::SafetyLevel slSwitchingOff;
+    eeros::safety::SafetyLevel slSwitchingOn;
     eeros::safety::SafetyLevel slSystemOn;
+    
 
 private:
     // Define all critical outputs
