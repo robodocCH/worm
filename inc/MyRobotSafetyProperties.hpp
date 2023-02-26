@@ -19,7 +19,8 @@ public:
     
     // Define all possible events
     eeros::safety::SafetyEvent seDoSystemOn; 
- //   eeros::safety::SafetyEvent seSwitchedOn;
+    eeros::safety::SafetyEvent seSwitchedOn;
+    eeros::safety::SafetyEvent seDoExit;
     eeros::safety::SafetyEvent seDoStop;
     eeros::safety::SafetyEvent seStopped;
     eeros::safety::SafetyEvent seDoSystemOff;

@@ -6,6 +6,9 @@
 #include <eeros/control/Constant.hpp>
 #include <eeros/control/Gain.hpp>
 #include <eeros/control/can/CanHandle.hpp>
+#include <eeros/control/PeripheralInput.hpp>
+#include <eeros/control/PeripheralOutput.hpp>
+#include <eeros/control/PathPlannerCubic.hpp>
 #include "CanSendRaw.hpp"
 #include "CanReceiveRaw.hpp"
 
@@ -19,10 +22,19 @@ class ControlSystem
 {
 public:
     ControlSystem(double dt);
+    /*
     CanHandle handle;
     CanSendRaw<nofNodes> canSend;
     CanReceiveRaw<nofNodes> canReceive;
-    Constant<Matrix<nofNodes,1,double>> pos;
+    */
+
+    
+    PeripheralOutput<> servo3;
+    PeripheralOutput<> servo4;
+    PeripheralInput<> encoder1;
+//    Constant<Matrix<nofNodes,1,double>> pos;
+    Constant<> pos;
+    PathPlannerCubic ppq;
     TimeDomain timedomain;
 
     /*

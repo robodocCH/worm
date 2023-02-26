@@ -10,7 +10,8 @@ MyRobotSafetyProperties::MyRobotSafetyProperties(ControlSystem &cs, double dt)
       slSystemOn("System is on"),
 
       seDoSystemOn("Startup the system"),
- //     seSwitchedOn("System is switched on"),
+      seSwitchedOn("System is switched on"),
+      seDoExit("Exit done"),
       seDoStop("do Stop"),
       seStopped("top do done"),
       seDoSystemOff("Shutdown the system")
@@ -37,13 +38,16 @@ MyRobotSafetyProperties::MyRobotSafetyProperties(ControlSystem &cs, double dt)
     addLevel(slSystemOn);
 
     // Add events to individual safety levels
+    slStop.addEvent(seDoSystemOff, slSystemOff, kPrivateEvent);
     slStop.addEvent(seDoSystemOn, slSwitchingOn, kPublicEvent);
     slStopping.addEvent(seStopped, slStop, kPrivateEvent);
     slSwitchingOn.addEvent(seSwitchedOn, slSystemOn, kPrivateEvent);
-
+   
 
     // Add events to multiple safety levels
     addEventToLevelAndAbove(slSwitchingOn, seDoStop, slStopping, kPublicEvent);
+    addEventToLevelAndAbove(slStop, seDoExit, slSystemOff, kPrivateEvent);
+    
     // addEventToAllLevelsBetween(lowerLevel, upperLevel, event, targetLevel, kPublicEvent/kPrivateEvent);
 
     // Define input actions for all levels
@@ -54,19 +58,22 @@ MyRobotSafetyProperties::MyRobotSafetyProperties(ControlSystem &cs, double dt)
 
     // Define and add level actions
     slSystemOff.setLevelAction([&](SafetyContext *privateContext) {
+        // Hier sollte CAN Stopbefehl "Motor stop (0x81)" oder "Motor shutdown (0x80)" ausgelöst werden"
         cs.timedomain.stop();
         eeros::Executor::stop();
     });
 
     slStop.setLevelAction([&](SafetyContext *privateContext) {
-        privateContext->triggerEvent(seStart);
+        privateContext->triggerEvent(seDoSystemOn);
     });
 
     slStopping.setLevelAction([&](SafetyContext *privateContext) {
-    // Hier sollte CAN Stopbefehl "Motor stop (0x81)" oder "Motor shutdown (0x80)" ausgelöst werden"
+        // Hier sollte CAN Stopbefehl "Motor stop (0x81)" oder "Motor shutdown (0x80)" ausgelöst werden"
+        privateContext->triggerEvent(seStopped);    
     });
 
     slSwitchingOn.setLevelAction([&](SafetyContext *privateContext) {
+        privateContext->triggerEvent(seSwitchedOn);
     });
 
     slSystemOn.setLevelAction([&](SafetyContext *privateContext) {
@@ -78,6 +85,6 @@ MyRobotSafetyProperties::MyRobotSafetyProperties(ControlSystem &cs, double dt)
 
     // Define exit function
     exitFunction = ([&](SafetyContext *privateContext) {
-        privateContext->triggerEvent(doSwitchingOff);
+        privateContext->triggerEvent(seDoExit);
     });
 }
