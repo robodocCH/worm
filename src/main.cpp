@@ -19,7 +19,7 @@ void signalHandler(int signum)
 
 int main(int argc, char **argv)
 {
-    const double dt = 0.001;
+    const double dt = 0.01;
     eeros::logger::Logger::setDefaultStreamLogger(std::cout);
     eeros::logger::Logger log = eeros::logger::Logger::getLogger();
 
@@ -35,14 +35,16 @@ int main(int argc, char **argv)
     log.info() << "Initializing safety system...";
     MyRobotSafetyProperties sp(cs, dt);
     eeros::safety::SafetySystem ss(sp, dt);
-    cs.timedomain.registerSafetyEvent(ss, sp.seDoSystemOff); // fired if timedomain fails to run properly
+    cs.timedomain.registerSafetyEvent(ss, sp.seDoExit); // fired if timedomain fails to run properly
     signal(SIGINT, signalHandler);
 
     // create periodic function for logging
     eeros::task::Lambda l1 ([&] () { });
-    eeros::task::Periodic p2("p2", 0.1, l1);
+    eeros::task::Periodic p2("p2", 0.1, l1); // t=0.02 (normaly 0.1)
     p2.monitors.push_back([&](eeros::PeriodicCounter &pc, Logger &log) {
-        log.info() << cs.ppq.getJerkOut().getSignal().getTimestamp() << " "<< cs.ppq.getJerkOut().getSignal().getValue() << " "<< cs.ppq.getAccOut().getSignal().getValue() << " "<< cs.ppq.getVelOut().getSignal().getValue() << " "<< cs.ppq.getPosOut().getSignal().getValue();
+        // log.info() << cs.ppq1.getJerkOut().getSignal().getTimestamp() << " "<< cs.ppq1.getJerkOut().getSignal().getValue() << " "<< cs.ppq1.getAccOut().getSignal().getValue() << " "<< cs.ppq1.getVelOut().getSignal().getValue() << " "<< cs.ppq1.getPosOut().getSignal().getValue();
+        // log.info() << cs.tremor.getOut().getSignal();// 
+        log.info() << cs.ppq1.getPosOut().getSignal();
     });
 
     log.info() << "Initializing sequencer...";

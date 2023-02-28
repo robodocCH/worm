@@ -32,25 +32,33 @@ public:
         // cs.canReceive.enable();
         while(eeros::sequencer::Sequencer::running) {
             if (ss.getCurrentLevel() == sp.slSystemOn) {
-                //cs.pos.setValue({500, 300});
-                cs.pos.setValue(1.0);
-                wait(3);
-                //cs.pos.setValue({1000, 400});
-                cs.pos.setValue(0.0);
-                wait(3);
-                //cs.pos.setValue({0, 0});
-                cs.pos.setValue(-1.0);
-                wait(3);
+                // mit CAN
+                // cs.pos.setValue({500, 300});
+                // cs.pos.setValue({1000, 400});               
 
-                log.warn() << "pos at beginning" << cs.ppq.getPosOut().getSignal();
-                log.warn() << "move start ok:";
-                // move("path01.txt", 3, 10, 20);
-                cs.ppq.init("path01.txt");
-                cs.ppq.reset();
-                cs.ppq.move(3, 10, 20);
-                log.warn() << "end reached:" << cs.ppq.endReached();
-                log.warn() << "pos at end" << cs.ppq.getPosOut().getSignal();
-                wait(3);
+                // wait(1);
+                // cs.pos.setValue(0.0);
+                // wait(1);
+                //cs.pos.setValue({0, 0});
+                // wait(1);                
+                // cs.pos.setValue(-1.0);
+
+                move(5.0, "path01.txt", 0, 0.3, "path01.txt", 0, 1.0);
+                move(3.0, "path01.txt", 0.3, -0.5, "path01.txt", 1.0, -1.5);
+                move(1.5, "path01.txt", -0.2, -0.1, "path01.txt", -0.5, 1.5);
+                move(0.5, "path01.txt", -0.3, 0.5, "path01.txt", 1, 0.5);
+                move(2.0, "path01.txt", 0.2, 0.6, "path01.txt", 1.5, -2.0);
+                move(0.5, "path01.txt", 0.8, -0.8, "path01.txt", -0.5, 1.0);
+                move(1.0, "path01.txt", 0.0, 0.2, "path01.txt", 0.5, -1.5);
+                move(1.5, "path01.txt", 0.2, 0.8, "path01.txt", -1, 2);
+                move(0.5, "path01.txt", 1, 0.5, "path01.txt", 1, 0.5);
+                move(0.2, "path01.txt", 1.5, -2.0, "path01.txt", 1.5, -2.0);                
+                move(0.5, "path01.txt", -0.5, 0.5, "path01.txt", -0.5, 1.0);
+                move(0.5, "path01.txt", 0.0, 0.2, "path01.txt", 0.5, -1.5);
+                move(0.1, "path01.txt", 0.2, 0.8, "path01.txt", -1, 2);
+                move(0.5, "path01.txt", 1, 0.5, "path01.txt", 1, 0.5);
+                move(0.7, "path01.txt", 1.5, -1.5, "path01.txt", 1.5, -1.5);
+                // log.warn() << "pos at end" << cs.ppq1.getPosOut().getSignal();
             }
         }
         return 0;

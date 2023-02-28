@@ -1,5 +1,5 @@
-#ifndef CUSTOMSTEPTEMPLATE_HPP_
-#define CUSTOMSTEPTEMPLATE_HPP_
+#ifndef MOVE_HPP_
+#define MOVE_HPP_
 
 #include <eeros/sequencer/Step.hpp>
 
@@ -12,41 +12,39 @@ public:
         log.info() << "Step created: " << name;
     }
 
-    int operator() (std::string filename, double time, double startPos, double deltaPos) {
-        log.info() << "Step started: " << name;
-        this->filename = filename;    
+    int operator() (double time, std::string filename1, double startPos1, double deltaPos1, std::string filename2, double startPos2, double deltaPos2) {
         this->time = time;
-        this->startPos = startPos;
-        this->deltaPos = deltaPos;
-        return start();  // this will start the step or sequence
-    }
-
-    int operator() (std::string filename, double deltaPos) {
-        log.info() << "Step started: " << name;
-        this->filename = filename;    
-        this->startPos = startPos;
+        this->filename1 = filename1;    
+        this->startPos1 = startPos1;
+        this->deltaPos1 = deltaPos1;
+        this->filename2 = filename2;    
+        this->startPos2 = startPos2;
+        this->deltaPos2 = deltaPos2;
         return start();  // this will start the step or sequence
     }
 
     int action()
     {
-        cs.ppq.init(filename);
-        cs.ppq.move(time, startPos, deltaPos);
-        // cs.ppq.move(startPos);
+        cs.ppq1.init(filename1);
+        cs.ppq1.move(time, startPos1, deltaPos1);
+        cs.ppq2.init(filename1);
+        cs.ppq2.move(time, startPos1, deltaPos1);
         return 0;
     }
 
     bool checkExitCondition() {
-        log.info() << "Step check Condition: " << name;
-        return cs.ppq.endReached();
+        return cs.ppq1.endReached() & cs.ppq2.endReached();
     }
 
 private:
-    std::string filename; 
     double time; 
-    double startPos;	
-    double deltaPos;
+    std::string filename1; 
+    double startPos1;	
+    double deltaPos1;
+    std::string filename2; 
+    double startPos2;	
+    double deltaPos2;
     ControlSystem &cs;
 };
 
-#endif // CUSTOMSTEPTEMPLATE_HPP_
+#endif // MOVE_HPP_
