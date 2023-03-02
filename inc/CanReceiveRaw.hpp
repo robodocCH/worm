@@ -52,13 +52,16 @@ class CanReceiveRaw : public Blockio<0,1,Matrix<N,1,double>> {
   virtual void run() {
     Matrix<N,1,double> angle{0, 0};
     if (enabled) {
-//       for (std::size_t i = 0; i < nodes.size(); i++) {
-      for (std::size_t i = 0; i < 1; i++) {
+      for (std::size_t i = 0; i < nodes.size(); i++) {
+      // for (std::size_t i = 0; i < 2; i++) {
         can_frame f;
         int err = read(socket, &f, sizeof(struct can_frame));
-//        if (err < 0) throw eeros::Fault("receiving over CAN failed");
-        uint16_t val = f.data[7] << 8 | f.data[6];
-        angle[i] = val * scale[i];
+        canid_t node = f.can_id-0x240;
+//        log.warn() << "node " << node;
+        if (node > 0 && node < 3) {
+          uint16_t val = f.data[7] << 8 | f.data[6];
+          angle[node-1] = val * scale[node-1];
+        }
       }
       this->getOut().getSignal().setValue(angle);
       this->out.getSignal().setTimestamp(System::getTimeNs());

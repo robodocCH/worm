@@ -51,8 +51,8 @@ class CanSendRaw : public Blockio<1,0,Matrix<N,1,double>> {
    */
   virtual void run() {
     if (enabled) {
-//       for (std::size_t i = 0; i < nodes.size(); i++) {
-      for (std::size_t i = 0; i < 1; i++) {
+  //       for (std::size_t i = 0; i < nodes.size(); i++) {
+      for (std::size_t i = 0; i < 2; i++) {
         uint32_t pos = this->getIn().getSignal().getValue()[i] * scale(i);
         uint16_t sp = speed[i];
         can_frame f;
@@ -66,8 +66,30 @@ class CanSendRaw : public Blockio<1,0,Matrix<N,1,double>> {
         f.data[6] = (uint8_t)(pos >> 16);
         f.data[7] = (uint8_t)(pos >> 24);
         int err = write(socket, &f, sizeof(struct can_frame));
-        if (err < 0) throw eeros::Fault("sending over CAN failed");
+        if (err < 0) throw eeros::Fault("sending motion setpoint over CAN failed");
       }
+    }
+  }
+
+  /**
+   * Motor shutdown
+   *
+   */
+  virtual void motorShutdown() {
+  //       for (std::size_t i = 0; i < nodes.size(); i++) {
+    for (std::size_t i = 0; i < 2; i++) {
+      can_frame f;
+      f.can_id = 0x140 + nodes[i];
+      f.can_dlc = 8;
+      f.data[0] = 0x80;
+      f.data[2] = 0;
+      f.data[3] = 0;
+      f.data[4] = 0;
+      f.data[5] = 0;
+      f.data[6] = 0;
+      f.data[7] = 0;
+      int err = write(socket, &f, sizeof(struct can_frame));
+      if (err < 0) throw eeros::Fault("sending motor shutdown command over CAN failed");
     }
   }
 

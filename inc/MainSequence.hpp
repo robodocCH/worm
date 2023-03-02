@@ -26,38 +26,34 @@ public:
     }
 
     int action() {
-        // Vector2 speed{5000, 5000};
-        // cs.canSend.setSpeed(speed);
-        // cs.canSend.enable();
-        // cs.canReceive.enable();
+        Vector2 speed{3000, 3000};
+        // Geschwindigkeit für Aufstarten
+        cs.canSend.setSpeed(speed);
+        // --------------------------------------------------------------------------------------------------------------------------------------
+        cs.canSend.enable();
+        cs.canReceive.enable();
         while(eeros::sequencer::Sequencer::running) {
             if (ss.getCurrentLevel() == sp.slSystemOn) {
-                // mit CAN
-                // cs.pos.setValue({500, 300});
-                // cs.pos.setValue({1000, 400});               
-
-                // wait(1);
-                // cs.pos.setValue(0.0);
-                // wait(1);
-                //cs.pos.setValue({0, 0});
-                // wait(1);                
-                // cs.pos.setValue(-1.0);
-
-                move(5.0, "path01.txt", 0, 0.3, "path01.txt", 0, 1.0);
-                move(3.0, "path01.txt", 0.3, -0.5, "path01.txt", 1.0, -1.5);
-                move(1.5, "path01.txt", -0.2, -0.1, "path01.txt", -0.5, 1.5);
-                move(0.5, "path01.txt", -0.3, 0.5, "path01.txt", 1, 0.5);
-                move(2.0, "path01.txt", 0.2, 0.6, "path01.txt", 1.5, -2.0);
-                move(0.5, "path01.txt", 0.8, -0.8, "path01.txt", -0.5, 1.0);
-                move(1.0, "path01.txt", 0.0, 0.2, "path01.txt", 0.5, -1.5);
-                move(1.5, "path01.txt", 0.2, 0.8, "path01.txt", -1, 2);
-                move(0.5, "path01.txt", 1, 0.5, "path01.txt", 1, 0.5);
-                move(0.2, "path01.txt", 1.5, -2.0, "path01.txt", 1.5, -2.0);                
-                move(0.5, "path01.txt", -0.5, 0.5, "path01.txt", -0.5, 1.0);
-                move(0.5, "path01.txt", 0.0, 0.2, "path01.txt", 0.5, -1.5);
-                move(0.1, "path01.txt", 0.2, 0.8, "path01.txt", -1, 2);
-                move(0.5, "path01.txt", 1, 0.5, "path01.txt", 1, 0.5);
-                move(0.7, "path01.txt", 1.5, -1.5, "path01.txt", 1.5, -1.5);
+                // Aufstarten, auf 0 fahren
+                move(30.0, "path01.txt", 0.1, 0.0, "path01.txt", 0.1, 0.0);
+                // Ab hier Geschwindigket freigeben
+                Vector2 speed{30000, 30000};
+                // Achtung Gefahr: Höhere Werte führen zu Fehler, die Geschwindigkeit ist noch nicht skalliert und das Problem ist noch nicht abgefabgen.
+                cs.canSend.setSpeed(speed);
+                move(1.0, "path01.txt", 0.0, 0.8, "path01.txt", 0.0, 0.8);
+                move(1.0, "path01.txt", 0.8, 1.0, "path01.txt", 0.8, 1.0);
+                move(1.0, "path01.txt", 1.0, 0.0, "path01.txt", 1.0, 0.0);
+                move(1.5, "path01.txt", 0.0, -1.0, "path01.txt", 0.0, -1.0);
+                move(2.0, "path01.txt", -1.0, -0.7, "path01.txt", -1.0, -0.7);
+                move(1.0, "path01.txt", -0.7, 0.8, "path01.txt", -0.7, 0.8);
+                move(1.0, "path01.txt", 0.8, 0.0, "path01.txt", 0.8, 0.0);
+                wait(2);
+                log.warn() << "wormTest1Xppq.txt started";
+                move(30.0, "wormTest1Xppq.txt", 0, 0.01, "wormTest1Xppq.txt", 0, 0.01);
+                log.warn() << "wormTest1Xppq.txt ended";
+                wait(2);
+                move(5.0, "path01.txt", 0.01, 0.0, "path01.txt", 0.01, 0.0);
+                wait(2);
                 // log.warn() << "pos at end" << cs.ppq1.getPosOut().getSignal();
             }
         }

@@ -46,7 +46,7 @@ MyRobotSafetyProperties::MyRobotSafetyProperties(ControlSystem &cs, double dt)
 
     // Add events to multiple safety levels
     addEventToLevelAndAbove(slSwitchingOn, seDoStop, slStopping, kPublicEvent);
-    addEventToLevelAndAbove(slStop, seDoExit, slSystemOff, kPrivateEvent);
+    addEventToLevelAndAbove(slStop, seDoExit, slSystemOff, kPublicEvent);
     
     // addEventToAllLevelsBetween(lowerLevel, upperLevel, event, targetLevel, kPublicEvent/kPrivateEvent);
 
@@ -59,6 +59,7 @@ MyRobotSafetyProperties::MyRobotSafetyProperties(ControlSystem &cs, double dt)
     // Define and add level actions
     slSystemOff.setLevelAction([&](SafetyContext *privateContext) {
         // Hier sollte CAN Stopbefehl "Motor stop (0x81)" oder "Motor shutdown (0x80)" ausgelöst werden"
+        cs.canSend.motorShutdown();
         cs.timedomain.stop();
         eeros::Executor::stop();
     });
@@ -69,6 +70,7 @@ MyRobotSafetyProperties::MyRobotSafetyProperties(ControlSystem &cs, double dt)
 
     slStopping.setLevelAction([&](SafetyContext *privateContext) {
         // Hier sollte CAN Stopbefehl "Motor stop (0x81)" oder "Motor shutdown (0x80)" ausgelöst werden"
+        cs.canSend.motorShutdown();
         privateContext->triggerEvent(seStopped);    
     });
 

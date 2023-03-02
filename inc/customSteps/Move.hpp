@@ -12,14 +12,14 @@ public:
         log.info() << "Step created: " << name;
     }
 
-    int operator() (double time, std::string filename1, double startPos1, double deltaPos1, std::string filename2, double startPos2, double deltaPos2) {
+    int operator() (double time, std::string filename1, double startPos1, double endPos1, std::string filename2, double startPos2, double endPos2) {
         this->time = time;
         this->filename1 = filename1;    
         this->startPos1 = startPos1;
-        this->deltaPos1 = deltaPos1;
+        this->deltaPos1 = endPos1 - startPos1;
         this->filename2 = filename2;    
         this->startPos2 = startPos2;
-        this->deltaPos2 = deltaPos2;
+        this->deltaPos2 = endPos1 - startPos1;
         return start();  // this will start the step or sequence
     }
 

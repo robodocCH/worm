@@ -6,6 +6,8 @@
 #include <eeros/control/Constant.hpp>
 #include <eeros/control/Gain.hpp>
 #include <eeros/control/Sum.hpp>
+#include <eeros/control/Mux.hpp>
+#include <eeros/control/filter/LowPassFilter.hpp>
 #include <eeros/control/PeripheralInput.hpp>
 #include <eeros/control/PeripheralOutput.hpp>
 #include <eeros/control/PathPlannerCubic.hpp>
@@ -24,9 +26,10 @@ class ControlSystem
 {
 public:
     ControlSystem(double dt);
-    // CanHandle handle;
-    // CanSendRaw<nofNodes> canSend;
-    // CanReceiveRaw<nofNodes> canReceive;
+    CanHandle handle;
+    CanSendRaw<nofNodes> canSend;
+    CanReceiveRaw<nofNodes> canReceive;
+    Constant<Matrix<nofNodes,1,double>> pos;
     
     // Define Blocks    
     PeripheralInput<> encoder1;
@@ -38,11 +41,14 @@ public:
     FourierSignalSource<> breath;  
     FourierSignalSource<> tremor1;  
     FourierSignalSource<> tremor2;  
-     Sum<3> sum1;
-     Sum<2> sum2;
+    Mux<2> mux;     
+    Sum<3> sum1;
+    Sum<2> sum2;
+    LowPassFilter<> filter1;
+    LowPassFilter<> filter2;
 
-//    Constant<Matrix<nofNodes,1,double>> pos;
-    Constant<> pos;
+
+//    Constant<> pos;
     
     TimeDomain timedomain;
 };

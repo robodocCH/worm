@@ -19,7 +19,7 @@ void signalHandler(int signum)
 
 int main(int argc, char **argv)
 {
-    const double dt = 0.01;
+    const double dt = 0.005;
     eeros::logger::Logger::setDefaultStreamLogger(std::cout);
     eeros::logger::Logger log = eeros::logger::Logger::getLogger();
 
@@ -44,7 +44,9 @@ int main(int argc, char **argv)
     p2.monitors.push_back([&](eeros::PeriodicCounter &pc, Logger &log) {
         // log.info() << cs.ppq1.getJerkOut().getSignal().getTimestamp() << " "<< cs.ppq1.getJerkOut().getSignal().getValue() << " "<< cs.ppq1.getAccOut().getSignal().getValue() << " "<< cs.ppq1.getVelOut().getSignal().getValue() << " "<< cs.ppq1.getPosOut().getSignal().getValue();
         // log.info() << cs.tremor.getOut().getSignal();// 
-        log.info() << cs.ppq1.getPosOut().getSignal();
+        // log.info() << cs.ppq1.getPosOut().getSignal();        
+        log.info() << cs.sum1.getOut().getSignal() << "     " << cs.canReceive.getOut().getSignal().getValue();
+        cs.canSend().
     });
 
     log.info() << "Initializing sequencer...";
