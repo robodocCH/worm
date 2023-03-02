@@ -46,7 +46,6 @@ int main(int argc, char **argv)
         // log.info() << cs.tremor.getOut().getSignal();// 
         // log.info() << cs.ppq1.getPosOut().getSignal();        
         log.info() << cs.sum1.getOut().getSignal() << "     " << cs.canReceive.getOut().getSignal().getValue();
-        cs.canSend().
     });
 
     log.info() << "Initializing sequencer...";

@@ -51,9 +51,8 @@ class CanSendRaw : public Blockio<1,0,Matrix<N,1,double>> {
    */
   virtual void run() {
     if (enabled) {
-  //       for (std::size_t i = 0; i < nodes.size(); i++) {
-      for (std::size_t i = 0; i < 2; i++) {
-        uint32_t pos = this->getIn().getSignal().getValue()[i] * scale(i);
+      for (std::size_t i = 0; i < nodes.size(); i++) {
+        int32_t pos = this->getIn().getSignal().getValue()[i] * scale(i);
         uint16_t sp = speed[i];
         can_frame f;
         f.can_id = 0x140 + nodes[i];

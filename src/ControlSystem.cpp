@@ -12,18 +12,20 @@ ControlSystem::ControlSystem(double dt)
         servo4("servo4"),
         ppq1(dt),
         ppq2(dt),
-        breath(2.544690049, -0.0045, 0.0201, 0.005, 0.002, 0.0016), 
-        tremor1(2.544690049, -0.0045, 0.0201, 0.005, 0.002, 0.0016), // ++++++++++ Zahlen aendern ++++++++++++++++++++++++++
-        tremor2(2.544690049, -0.0045, 0.0201, 0.005, 0.002, 0.0016), // ++++++++++ Zahlen aendern ++++++++++++++++++++++++++
+//        ppca1(dt),
+//        ppca2(dt),
+        saturation1(-1.1, 1.1),
+        saturation2(-1.1, 1.1),
+
+        breath(2.513274123, -0.009, 0.0403, 0.01, 0.004, 0.0032),
+        tremor1(12.72345025, -0.0015, 0.0041, 0.0013, 0.001, 0.0006),
+        tremor2(13.66592804, -0.0006, 0.0047, 0.0022, 0.0009, 0.0023),
         filter1(0.1),
         filter2(0.1),
-        pos(),
-
-        // tremor: FourierSignalSource(double omega, double a0, double a1=0, double a2=0, double a3=0, double a4=0)
-        // 2.544690049	-0.0045	0.0201	0.005	0.002	0.0016
+//        pos(),
         timedomain("Main time domain", dt, true)
 {
-    pos.setValue(0.0);
+//    pos.setValue(0.0);
     ppq1.getPosOut().getSignal().setValue(0.0); // Startposition setzen
     ppq2.getPosOut().getSignal().setValue(0.0); // Startposition setzen
     breath.getOut().getSignal().setValue(0.0); // Startposition setzen
@@ -75,20 +77,25 @@ ControlSystem::ControlSystem(double dt)
     sum1.getOut().getSignal().setName("Sum1 Pos Setpoint");
     sum2.getOut().getSignal().setName("Sum2 Pos Setpoint");
 
+    saturation1.setName("Saturation 1");
+    saturation2.setName("Saturation 2");
 
     filter1.getIn().connect(ppq1.getPosOut());
     sum1.getIn(0).connect(filter1.getOut());
     sum1.getIn(1).connect(breath.getOut());
     sum1.getIn(2).connect(tremor1.getOut());
-    servo3.getIn().connect(sum1.getOut());
+    saturation1.getIn().connect(sum1.getOut());
+    servo3.getIn().connect(saturation1.getOut());
+
 
     filter2.getIn().connect(ppq2.getPosOut());
     sum2.getIn(0).connect(filter2.getOut());
     sum2.getIn(1).connect(tremor2.getOut());
-    servo4.getIn().connect(sum2.getOut());
+    saturation2.getIn().connect(sum2.getOut());
+    servo4.getIn().connect(saturation2.getOut());
 
-    mux.getIn(0).connect(sum1.getOut());
-    mux.getIn(1).connect(sum2.getOut());
+    mux.getIn(0).connect(saturation1.getOut());
+    mux.getIn(1).connect(saturation2.getOut());
 
     canSend.getIn().connect(mux.getOut());
 
@@ -108,6 +115,8 @@ ControlSystem::ControlSystem(double dt)
     timedomain.addBlock(tremor2);
     timedomain.addBlock(sum1);
     timedomain.addBlock(sum2);
+    timedomain.addBlock(saturation1);
+    timedomain.addBlock(saturation2);
     timedomain.addBlock(mux);
     
     timedomain.addBlock(canSend);

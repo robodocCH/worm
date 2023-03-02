@@ -8,6 +8,8 @@
 #include <eeros/control/Sum.hpp>
 #include <eeros/control/Mux.hpp>
 #include <eeros/control/filter/LowPassFilter.hpp>
+#include <eeros/control/Saturation.hpp>
+#include <eeros/control/PathPlannerConstAcc.hpp>
 #include <eeros/control/PeripheralInput.hpp>
 #include <eeros/control/PeripheralOutput.hpp>
 #include <eeros/control/PathPlannerCubic.hpp>
@@ -38,6 +40,10 @@ public:
     PeripheralOutput<> servo4;
     PathPlannerCubic ppq1;
     PathPlannerCubic ppq2;
+//    PathPlannerConstAcc<> ppca1;
+//    PathPlannerConstAcc<> ppca2;
+    Saturation<> saturation1;
+    Saturation<> saturation2;
     FourierSignalSource<> breath;  
     FourierSignalSource<> tremor1;  
     FourierSignalSource<> tremor2;  
@@ -46,7 +52,6 @@ public:
     Sum<2> sum2;
     LowPassFilter<> filter1;
     LowPassFilter<> filter2;
-
 
 //    Constant<> pos;
     

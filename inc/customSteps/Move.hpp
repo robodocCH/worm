@@ -2,6 +2,9 @@
 #define MOVE_HPP_
 
 #include <eeros/sequencer/Step.hpp>
+#include <cmath>
+#include <eeros/core/Fault.hpp>
+
 
 class Move : public eeros::sequencer::Step
 {
@@ -14,12 +17,22 @@ public:
 
     int operator() (double time, std::string filename1, double startPos1, double endPos1, std::string filename2, double startPos2, double endPos2) {
         this->time = time;
+        double pos1Actual = cs.ppq1.getPosOut().getSignal().getValue();
+        double pos2Actual = cs.ppq2.getPosOut().getSignal().getValue();
+        double limit = 0.05;            
+        startPos1 = pos1Actual;
+        startPos2 = pos2Actual;
+        if (std::abs(((startPos1-pos1Actual) > limit) || ((startPos2-pos2Actual) > limit))){
+            throw eeros::Fault("Robot is not at the desired starting position: Position step too big");
+            //
+        };
         this->filename1 = filename1;    
         this->startPos1 = startPos1;
         this->deltaPos1 = endPos1 - startPos1;
         this->filename2 = filename2;    
         this->startPos2 = startPos2;
         this->deltaPos2 = endPos1 - startPos1;
+
         return start();  // this will start the step or sequence
     }
 
