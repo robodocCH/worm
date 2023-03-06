@@ -40,12 +40,13 @@ int main(int argc, char **argv)
 
     // create periodic function for logging
     eeros::task::Lambda l1 ([&] () { });
-    eeros::task::Periodic p2("p2", 0.1, l1); // t=0.02 (normaly 0.1)
+    eeros::task::Periodic p2("p2", 0.2, l1); // t=0.2 (normaly 0.1)
     p2.monitors.push_back([&](eeros::PeriodicCounter &pc, Logger &log) {
         // log.info() << cs.ppq1.getJerkOut().getSignal().getTimestamp() << " "<< cs.ppq1.getJerkOut().getSignal().getValue() << " "<< cs.ppq1.getAccOut().getSignal().getValue() << " "<< cs.ppq1.getVelOut().getSignal().getValue() << " "<< cs.ppq1.getPosOut().getSignal().getValue();
         // log.info() << cs.tremor.getOut().getSignal();// 
         // log.info() << cs.ppq1.getPosOut().getSignal();        
-        log.info() << cs.sum1.getOut().getSignal() << "     " << cs.canReceive.getOut().getSignal().getValue();
+        // log.info() << cs.ppq1.getPosOut().getSignal() << "; " << cs.sum1.getOut().getSignal() << "; " << cs.canReceive.getOut().getSignal().getValue();
+        // log.info() << cs.ppq2.getPosOut().getSignal() << "; " << cs.sum2.getOut().getSignal() << "; " << cs.canReceive.getOut().getSignal().getValue();
     });
 
     log.info() << "Initializing sequencer...";

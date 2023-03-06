@@ -9,6 +9,10 @@
 #include <eeros/sequencer/Wait.hpp>
 #include "customSteps/Move.hpp"
 #include "customSequences/behaviour_1.hpp"
+#include "customSequences/Testmotions.hpp"
+#include "customSequences/TestmotionsFast.hpp"
+#include "customSequences/Flaps.hpp"
+
 
 class MainSequence : public eeros::sequencer::Sequence
 {
@@ -22,60 +26,82 @@ public:
           cs(cs),
           move("move", this, cs),
           behave1("behave1", this, cs),          
+          testmotions("testmotions", this, cs),
+          testmotionsFast("testmotionsFast", this, cs),
+          flaps("flaps", this, cs),
           wait("Wait", this)
     {
         log.info() << "Sequence created: " << name;
     }
 
     int action() {
-        Vector2 speed{3000, 3000};
-        // Geschwindigkeit für Aufstarten
-        cs.canSend.setSpeed(speed);
-        // --------------------------------------------------------------------------------------------------------------------------------------
+
+        // *********************************************************************************      
+        // cs.canSend.disable();
+        // cs.canReceive.disable();  
         cs.canSend.enable();
-        cs.canReceive.enable();
+        cs.canReceive.enable();  
+        // *********************************************************************************    
+
+        // Geschwindigkeit für Aufstarten       
+        // *********************************************************************************      
+        Vector2 speed{1000, 1000};
+        // Vector2 speed{30000, 30000};
+        // *********************************************************************************      
+        cs.canSend.setSpeed(speed);
+        // Aufstarten, auf 0 fahren
+
+        // Funktioniert nicht!! gefährlich!
+        double pos1Actual = cs.ppq1.getPosOut().getSignal().getValue();
+        double pos2Actual = cs.ppq2.getPosOut().getSignal().getValue();
+        log.warn() << "position 1 = " << pos1Actual;
+        log.warn() << "position 2 = " << pos2Actual;
+        wait(5);
+        log.warn() << "Start homing in 5 s";
+        wait(5);
+        log.warn() << "Start homing";
+        move(5.0, "basePath.txt", 0.1, 0.0, "basePath.txt", 0.1, 0.0);
+        log.warn() << "End homing";
+        // Ab hier Geschwindigket freigeben
+        // Achtung Gefahr: Höhere Werte führen zu Fehler, die Geschwindigkeit ist noch nicht skalliert und das Problem ist noch nicht abgefangen.
+        //----------------------------------------------------
+        speed[0] = 30000; // 30000
+        speed[1] = 30000; // 30000
+        // --------------------------------------------------------------------------------------------------------------------------------------------------
+        // cs.canSend.setSpeed(speed);
         while(eeros::sequencer::Sequencer::running) {
             if (ss.getCurrentLevel() == sp.slSystemOn) {
-                // Aufstarten, auf 0 fahren
-                move(30.0, "path01.txt", 0.1, 0.0, "path01.txt", 0.1, 0.0);
-
-                // Ab hier Geschwindigket freigeben
-                // Achtung Gefahr: Höhere Werte führen zu Fehler, die Geschwindigkeit ist noch nicht skalliert und das Problem ist noch nicht abgefabgen.
-                Vector2 speed{30000, 30000};
-                cs.canSend.setSpeed(speed);
-
+                        log.warn() << "testmotions started";
+                testmotions();           
+                        log.warn() << "testmotions ended";
+                wait(2);
+                        log.warn() << "behave1 started";
                 behave1();
-                // move(1.0, "path01.txt", 0.0, 0.8, "path01.txt", 0.0, 0.8);
-                // move(1.0, "path01.txt", 0.8, 1.0, "path01.txt", 0.8, 1.0);
-                // move(1.0, "path01.txt", 1.0, 0.0, "path01.txt", 1.0, 0.0);
-                // move(1.5, "path01.txt", 0.0, -1.0, "path01.txt", 0.0, -1.0);
-                // move(2.0, "path01.txt", -1.0, -0.7, "path01.txt", -1.0, -0.7);
-                // move(1.0, "path01.txt", -0.7, 1.5, "path01.txt", -0.7, 0.8);
-                // move(1.0, "path01.txt", 1.5, 0.0, "path01.txt", 0.8, 0.0);
+                        log.warn() << "behave1 ended";
+                        log.warn() << "testmotionsFast started";
+                testmotionsFast();
+                        log.warn() << "testmotionsFast ended";
                 wait(2);
-                // log.warn() << "wormTest1Xppq.txt started";
-                // move(30.0, "wormTest1Xppq.txt", 0, 0.01, "wormTest1Xppq.txt", 0, 0.01);
-                // log.warn() << "wormTest1Xppq.txt ended";
-                log.warn() << "5_wormTest2_SplinerOut started";
-                move(5.0, "5_wormTest2_X_SplinerOut.txt", 0, 0.05, "5_wormTest2_Y_SplinerOut.txt", 0, 0.05);
-                log.warn() << "5_wormTest2_SplinerOut ended";
+                       log.warn() << "testmotionsFast started";
+                flaps();                    
+                        log.warn() << "testmotionsFast ended";
+                        log.warn() << "testmotionsFast started";
+                testmotionsFast();
+                        log.warn() << "testmotionsFast ended";
                 wait(2);
-                double pos1Temp = cs.ppq1.getPosOut().getSignal().getValue();
-                double pos2Temp = cs.ppq2.getPosOut().getSignal().getValue();
-                move(10.0, "path01.txt", pos1Temp, 0.0, "path01.txt", pos2Temp, 0.0);
-                wait(2);
-                // log.warn() << "pos at end" << cs.ppq1.getPosOut().getSignal();
             }
         }
         return 0;
     }
-
 private:
     eeros::safety::SafetySystem &ss;
     ControlSystem &cs;
     MyRobotSafetyProperties &sp;
     Move move;
     Behaviour_1 behave1;
+    Testmotions testmotions;
+    TestmotionsFast testmotionsFast;
+    Flaps flaps;
     eeros::sequencer::Wait wait;
 };
 

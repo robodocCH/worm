@@ -55,11 +55,12 @@ class CanReceiveRaw : public Blockio<0,1,Matrix<N,1,double>> {
       for (std::size_t i = 0; i < nodes.size(); i++) {
         can_frame f;
         int err = read(socket, &f, sizeof(struct can_frame));
+        // List immer den gleichen Node oder sinnlosen node
         canid_t node = f.can_id-0x240;
-//        log.warn() << "node " << node;
+//        log.warn() << "receive " << i << " f.can_id " << f.can_id << "node " << node;
         if (node > 0 && node < 3) {
           int16_t val = f.data[7] << 8 | f.data[6];
-          angle[node-1] = val * scale[node-1];
+          angle[node-1] = val * scale[node-1] + offset[node-1];
         }
       }
       this->getOut().getSignal().setValue(angle);
@@ -102,10 +103,25 @@ class CanReceiveRaw : public Blockio<0,1,Matrix<N,1,double>> {
     this->scale = scale;
   }
 
+  /**
+   * Sets the offset for the position information.
+   *
+   * The drive needs its position information as a 4 bytes value.
+   * The offset allows to transform this value into meaningful
+   * position information in rad/s or m/s.
+   *
+   * @param scale The scaling factor for the position for all drives
+   */
+  virtual void setOffset(Matrix<N,1,double>& offset) {
+    this->offset = offset;
+  }
+
+
  private:
   int socket;
   bool enabled = false;
   Matrix<N,1,double> scale;
+  Matrix<N,1,double> offset;
   std::vector<uint8_t> nodes;
   Logger log;
 };

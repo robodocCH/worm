@@ -36,8 +36,9 @@ class CanSendRaw : public Blockio<1,0,Matrix<N,1,double>> {
    */
   CanSendRaw(int socket, std::initializer_list<uint8_t> node)
       : socket(socket), nodes(node), log(Logger::getLogger('Y')) {
-    for (size_t i = 0; i < node.size(); i++) {
+      for (size_t i = 0; i < node.size(); i++) {
       scale[i] = 1;
+      offset[i] = 0;
     }
     log.info() << "CAN send block constructed, " << node.size() << " nodes";
   }
@@ -52,10 +53,13 @@ class CanSendRaw : public Blockio<1,0,Matrix<N,1,double>> {
   virtual void run() {
     if (enabled) {
       for (std::size_t i = 0; i < nodes.size(); i++) {
-        int32_t pos = this->getIn().getSignal().getValue()[i] * scale(i);
+        double posWithOffset = this->getIn().getSignal().getValue()[i] + offset[i];
+        int32_t pos = posWithOffset * scale(i);
+//        log.info() << "Ausgabeposition nach Skallierung in 0.01° pos " << i << " = " << pos;
         uint16_t sp = speed[i];
         can_frame f;
         f.can_id = 0x140 + nodes[i];
+//        log.warn() << "send " << i << " node " << f.can_id;
         f.can_dlc = 8;
         f.data[0] = 0xa5;
         f.data[2] = (uint8_t)sp;
@@ -64,8 +68,11 @@ class CanSendRaw : public Blockio<1,0,Matrix<N,1,double>> {
         f.data[5] = (uint8_t)(pos >> 8);
         f.data[6] = (uint8_t)(pos >> 16);
         f.data[7] = (uint8_t)(pos >> 24);
-        int err = write(socket, &f, sizeof(struct can_frame));
-        if (err < 0) throw eeros::Fault("sending motion setpoint over CAN failed");
+        if (enabled) {
+        // if (enabled && (f.can_id == 322)){
+          int err = write(socket, &f, sizeof(struct can_frame));
+          if (err < 0) throw eeros::Fault("sending motion setpoint over CAN failed");          
+        }
       }
     }
   }
@@ -87,8 +94,10 @@ class CanSendRaw : public Blockio<1,0,Matrix<N,1,double>> {
       f.data[5] = 0;
       f.data[6] = 0;
       f.data[7] = 0;
-      int err = write(socket, &f, sizeof(struct can_frame));
-      if (err < 0) throw eeros::Fault("sending motor shutdown command over CAN failed");
+      if (enabled) {
+        int err = write(socket, &f, sizeof(struct can_frame));
+        if (err < 0) throw eeros::Fault("sending motor shutdown command over CAN failed");
+      }
     }
   }
 
@@ -138,10 +147,24 @@ class CanSendRaw : public Blockio<1,0,Matrix<N,1,double>> {
     this->scale = scale;
   }
 
- private:
+   /**
+   * Sets the offset for the position information.
+   *
+   * The drive needs its position information as a 4 bytes value.
+   * The offset allows to transform this value into meaningful
+   * position information in rad/s or m/s.
+   *
+   * @param scale The scaling factor for the position for all drives
+   */
+  virtual void setOffset(Matrix<N,1,double>& offset) {
+    this->offset = offset;
+  }
+
+private:
   int socket;
   bool enabled = false;
   Matrix<N,1,double> scale;
+  Matrix<N,1,double> offset;
   Matrix<N,1,double> speed;
   std::vector<uint8_t> nodes;
   Logger log;

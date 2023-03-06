@@ -9,6 +9,7 @@
 #include <eeros/control/Mux.hpp>
 #include <eeros/control/filter/LowPassFilter.hpp>
 #include <eeros/control/Saturation.hpp>
+#include <eeros/control/Gain.hpp>
 #include <eeros/control/PathPlannerConstAcc.hpp>
 #include <eeros/control/PeripheralInput.hpp>
 #include <eeros/control/PeripheralOutput.hpp>
@@ -31,7 +32,7 @@ public:
     CanHandle handle;
     CanSendRaw<nofNodes> canSend;
     CanReceiveRaw<nofNodes> canReceive;
-    Constant<Matrix<nofNodes,1,double>> pos;
+    Constant<Matrix<nofNodes,1,double >> pos;
     
     // Define Blocks    
     PeripheralInput<> encoder1;
@@ -40,8 +41,10 @@ public:
     PeripheralOutput<> servo4;
     PathPlannerCubic ppq1;
     PathPlannerCubic ppq2;
-//    PathPlannerConstAcc<> ppca1;
-//    PathPlannerConstAcc<> ppca2;
+    Gain<> gain1;
+    Gain<> gain2;
+    Saturation<> preSaturation1;
+    Saturation<> preSaturation2;
     Saturation<> saturation1;
     Saturation<> saturation2;
     FourierSignalSource<> breath;  
@@ -53,7 +56,7 @@ public:
     LowPassFilter<> filter1;
     LowPassFilter<> filter2;
 
-//    Constant<> pos;
+ //   Constant<> pos;
     
     TimeDomain timedomain;
 };

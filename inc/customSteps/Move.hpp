@@ -20,18 +20,19 @@ public:
         double pos1Actual = cs.ppq1.getPosOut().getSignal().getValue();
         double pos2Actual = cs.ppq2.getPosOut().getSignal().getValue();
         double limit = 0.05;            
-        startPos1 = pos1Actual;
-        startPos2 = pos2Actual;
         if (std::abs(((startPos1-pos1Actual) > limit) || ((startPos2-pos2Actual) > limit))){
-            throw eeros::Fault("Robot is not at the desired starting position: Position step too big");
+ //           throw eeros::Fault("Robot is not at the desired starting position: Position step too big");
+            log.warn() << "Robot is not at the desired starting position: Position step too big";
             //
         };
+        // startPos1 = pos1Actual;
+        // startPos2 = pos2Actual;        
         this->filename1 = filename1;    
         this->startPos1 = startPos1;
         this->deltaPos1 = endPos1 - startPos1;
         this->filename2 = filename2;    
         this->startPos2 = startPos2;
-        this->deltaPos2 = endPos1 - startPos1;
+        this->deltaPos2 = endPos2 - startPos2;
 
         return start();  // this will start the step or sequence
     }
@@ -40,13 +41,13 @@ public:
     {
         cs.ppq1.init(filename1);
         cs.ppq1.move(time, startPos1, deltaPos1);
-        cs.ppq2.init(filename1);
-        cs.ppq2.move(time, startPos1, deltaPos1);
+        cs.ppq2.init(filename2);
+        cs.ppq2.move(time, startPos2, deltaPos2);
         return 0;
     }
 
     bool checkExitCondition() {
-        return cs.ppq1.endReached() & cs.ppq2.endReached();
+        return cs.ppq1.endReached() && cs.ppq2.endReached(); // & ist bitweise!!!
     }
 
 private:
